@@ -53,6 +53,24 @@ Opcjonalny live RPC smoke (wymaga internetu):
 npm run smoke:rpc
 ```
 
+## Cloud Run quick deploy
+
+Repo jest pakowane jako jeden serwis Cloud Run:
+
+- `npm run gcp-build` buduje `apps/web/dist`,
+- `npm start` uruchamia Node na `0.0.0.0:$PORT`,
+- `/` serwuje UI,
+- `/api/health` i `/api/config` serwują API,
+- nieznane ścieżki UI dostają SPA fallback do `index.html`.
+
+Lokalna walidacja pakietu:
+
+```bash
+npm install
+npm run gcp-build
+npm run smoke:cloudrun
+```
+
 ## Pełny dev setup
 
 Wymagane później: Node 20+, Rust, Solana CLI, Anchor CLI.

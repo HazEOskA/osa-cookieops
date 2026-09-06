@@ -5,9 +5,13 @@
   "description": "Auditable AI-agent control plane for Cookie Chain",
   "type": "module",
   "scripts": {
+    "start": "node apps/api/src/server.mjs",
+    "build": "npm run build:web",
+    "gcp-build": "npm run build:web",
     "test": "node --test packages/core/test/*.test.mjs",
     "verify": "node scripts/verify.mjs",
     "smoke:rpc": "node scripts/cookie-rpc-smoke.mjs",
+    "smoke:cloudrun": "node scripts/cloud-run-smoke.mjs",
     "dev:web": "npm --workspace apps/web run dev",
     "build:web": "npm --workspace apps/web run build"
   },
