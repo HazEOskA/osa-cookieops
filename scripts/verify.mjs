@@ -7,8 +7,10 @@ const required = [
   'programs/osa_intent/src/lib.rs',
   'packages/core/src/intent.mjs',
   'apps/web/src/App.tsx',
+  'apps/web/src/lib/nightly.ts',
   'apps/api/src/server.mjs',
   'docs/ARCHITECTURE.md',
+  'docs/SUBMISSION.md',
 ];
 for (const path of required) await access(path, constants.R_OK);
 
@@ -37,4 +39,20 @@ for (const guard of ['0.0.0.0', '/api/health', '/api/config', 'apps/web/dist']) 
   if (!server.includes(guard)) throw new Error(`missing Cloud Run server guard: ${guard}`);
 }
 
-console.log('VERIFY PASS: repository, security and Cloud Run packaging guards present');
+const nightly = await readFile('apps/web/src/lib/nightly.ts', 'utf8');
+for (const guard of [
+  'standard:connect',
+  'standard:signTransaction',
+  'MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr',
+  'sendRawTransaction',
+  'confirmTransaction',
+]) {
+  if (!nightly.includes(guard)) throw new Error(`missing Nightly/on-chain guard: ${guard}`);
+}
+
+const app = await readFile('apps/web/src/App.tsx', 'utf8');
+for (const stage of ['PROPOSED', 'APPROVED', 'EXECUTED']) {
+  if (!app.includes(stage)) throw new Error(`missing bounty lifecycle stage: ${stage}`);
+}
+
+console.log('VERIFY PASS: security, Cloud Run, Nightly and Cookie Chain transaction guards present');

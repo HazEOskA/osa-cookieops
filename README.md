@@ -2,93 +2,125 @@
 
 Audytowalny control plane dla agentów AI na Cookie Chain.
 
-## Cel MVP
+## Co robi aplikacja
 
-Realny on-chain flow bez custody i bez automatycznego obrotu środkami:
+CookieOps rozdziela działanie agenta na trzy jawne fazy:
 
-1. `PROPOSED` — agent/operator tworzy intent PDA.
-2. `APPROVED` — właściciel portfela jawnie zatwierdza intent.
-3. `EXECUTED` — właściciel wykonuje zatwierdzony intent on-chain.
-4. Evidence — stan konta zawiera hash payloadu, sloty i timestampy.
+1. `PROPOSED` — operator Nightly podpisuje propozycję.
+2. `APPROVED` — operator podpisuje zatwierdzenie tej samej intencji.
+3. `EXECUTED` — operator podpisuje wykonanie.
 
-MVP celowo nie wykonuje swapów ani transferów. Najpierw udowadnia bezpieczny model approval/evidence; adaptery Cookie MCP i akcje finansowe mogą wejść dopiero jako osobny scope.
+Każdy etap jest osobną realną transakcją na Cookie Chain. Transakcja zawiera `intent id`, etap oraz ten sam SHA-256 hash payloadu. UI uznaje etap za zakończony dopiero po confirmation z Cookie Chain RPC i pokazuje signature, slot oraz link do CookieScan.
+
+MVP jest celowo **non-custodial**: nie przechowuje private keys, nie wykonuje swapów i nie transferuje aktywów. Demonstracja pokazuje bezpieczny primitive, który później może gate'ować akcje finansowe lub `cookie-mcp`.
+
+## Live
+
+https://osa-cookieops-bmnzqzarxa-ew.a.run.app/
 
 ## Cookie Chain
 
 - RPC: `https://rpc.cookiescan.io`
 - WebSocket: `https://wss.cookiescan.io`
 - Explorer: `https://cookiescan.io`
-- Wallet: Nightly / standardowy portfel SVM z custom RPC
+- Bridge: `https://hyperlane.cookiescan.io`
+- Wallet: Nightly z ustawionym custom SVM RPC
+
+## Bounty on-chain flow
+
+Bounty MVP używa standardowego Solana Memo Programu na Cookie Chain:
+
+`MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr`
+
+Przykładowy payload memo:
+
+```json
+{
+  "app": "OSA_COOKIEOPS",
+  "v": 1,
+  "intent": "...",
+  "stage": "APPROVED",
+  "payload": "<sha256>"
+}
+```
+
+Nightly podpisuje transakcję po stronie użytkownika. Backend nigdy nie dostaje klucza prywatnego.
 
 ## Repo
 
 ```text
 apps/
-  web/                 React/Vite UI shell
-  api/                 minimalny backend health/config
+  web/                 React/Vite UI + Nightly + Cookie Chain TX flow
+  api/                 Cloud Run static/API server
 packages/
-  core/                policy + state machine, testy bez zależności
+  core/                policy + state-machine tests
 programs/
-  osa_intent/          Anchor program
+  osa_intent/          experimental Anchor implementation (not required by bounty MVP)
 scripts/
-  verify.mjs           lokalny verifier repo
-  cookie-rpc-smoke.mjs opcjonalny live RPC smoke
-
+  verify.mjs
+  cookie-rpc-smoke.mjs
+  cloud-run-smoke.mjs
 docs/
   ARCHITECTURE.md
   DECISIONS.md
   BOUNTY.md
+  SUBMISSION.md
 ```
 
-## Szybka walidacja bez instalowania zależności
+## Quick validation
 
 ```bash
 npm test
 npm run verify
 ```
 
-Opcjonalny live RPC smoke (wymaga internetu):
+Optional live RPC smoke:
 
 ```bash
 npm run smoke:rpc
 ```
 
-## Cloud Run quick deploy
-
-Repo jest pakowane jako jeden serwis Cloud Run:
-
-- `npm run gcp-build` buduje `apps/web/dist`,
-- `npm start` uruchamia Node na `0.0.0.0:$PORT`,
-- `/` serwuje UI,
-- `/api/health` i `/api/config` serwują API,
-- nieznane ścieżki UI dostają SPA fallback do `index.html`.
-
-Lokalna walidacja pakietu:
+## Cloud Run
 
 ```bash
 npm install
 npm run gcp-build
 npm run smoke:cloudrun
+npm start
 ```
 
-## Pełny dev setup
+Cloud Run contract:
 
-Wymagane później: Node 20+, Rust, Solana CLI, Anchor CLI.
+- `npm run gcp-build` → builds `apps/web/dist`
+- `npm start` → listens on `0.0.0.0:$PORT`
+- `/` → UI
+- `/api/health` → health/config evidence
 
-```bash
-npm install
-npm run dev:web
-```
+## Nightly setup
 
-Dla programu Anchor ustaw provider na Cookie Chain w `Anchor.toml` i przed deployem wygeneruj właściwy program id. Aktualny `declare_id!` jest development placeholderem i NIE jest deklaracją wdrożenia.
+In Nightly add/select Cookie Chain as a custom SVM network:
+
+- RPC: `https://rpc.cookiescan.io`
+- WebSocket: `https://wss.cookiescan.io`
+
+The wallet needs a small COOK balance for transaction fees. Use the official community bridge linked above if needed.
+
+## Security
+
+- no private keys in backend
+- no custody
+- no asset transfer in bounty demo
+- every stage requires Nightly signature
+- same SHA-256 payload binding across stages
+- confirmation required before state advances
+- error state shown to user
 
 ## Status
 
-- architecture lock: ✅
-- core transition tests: ✅ lokalnie
-- repository verifier: ✅ lokalnie
-- Cookie RPC live smoke: zależny od sieci
-- Anchor build: wymaga toolchain/dependencies
-- web build: wymaga `npm install`
-- deploy: HOLD
-- bounty submission: HOLD
+- Nightly integration: ✅ code
+- real Cookie Chain memo transaction flow: ✅ code
+- confirmation/error UI: ✅ code
+- Cloud Run packaging: ✅
+- public live URL: ✅ existing deployment; redeploy required after the latest bounty-complete commit
+- actual signed Cookie Chain demo signatures: require user Nightly + COOK
+- Superteam submission: prepared in `docs/SUBMISSION.md`

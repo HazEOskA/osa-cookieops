@@ -1,8 +1,10 @@
-type Stage = 'PROPOSED' | 'APPROVED' | 'EXECUTED';
+import type { IntentStage } from '../lib/nightly';
+
+type Stage = 'READY' | IntentStage;
 
 export function StatusRail({ stage }: { stage: Stage }) {
-  const stages: Stage[] = ['PROPOSED', 'APPROVED', 'EXECUTED'];
-  const current = stages.indexOf(stage);
+  const stages: IntentStage[] = ['PROPOSED', 'APPROVED', 'EXECUTED'];
+  const current = stage === 'READY' ? -1 : stages.indexOf(stage);
   return (
     <div className="rail" aria-label="Intent lifecycle">
       {stages.map((item, index) => (
