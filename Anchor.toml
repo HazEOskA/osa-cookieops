@@ -1,0 +1,16 @@
+[toolchain]
+anchor_version = "0.31.1"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+osa_intent = "Fg6PaFpoGXkYsidMpWxTWqkZtM7FhS1SnmKrN6Z2yY"
+
+[provider]
+cluster = "https://rpc.cookiescan.io"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "node --test packages/core/test/*.test.mjs"

@@ -1,0 +1,21 @@
+{
+  "name": "osa-cookieops",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Auditable AI-agent control plane for Cookie Chain",
+  "type": "module",
+  "scripts": {
+    "test": "node --test packages/core/test/*.test.mjs",
+    "verify": "node scripts/verify.mjs",
+    "smoke:rpc": "node scripts/cookie-rpc-smoke.mjs",
+    "dev:web": "npm --workspace apps/web run dev",
+    "build:web": "npm --workspace apps/web run build"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  }
+}

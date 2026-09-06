@@ -1,0 +1,20 @@
+[package]
+name = "osa_intent"
+version = "0.1.0"
+edition = "2021"
+description = "Approval-bound intent state machine for OSA CookieOps"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "osa_intent"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = "0.31.1"
