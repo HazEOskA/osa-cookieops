@@ -94,7 +94,7 @@ export async function sendCookieOpsEvidence(params: {
   }).add(new TransactionInstruction({
     keys: [],
     programId: MEMO_PROGRAM_ID,
-    data: encoder.encode(memo),
+    data: encoder.encode(memo) as unknown as TransactionInstruction['data'],
   }));
 
   const serialized = transaction.serialize({
